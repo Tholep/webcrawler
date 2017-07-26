@@ -5,10 +5,10 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 from scrapy.exporters  import CsvItemExporter
-
+import datetime
 class SchoolInfoPipeline(object):
 	def __init__(self):
-		self.file = open("crawling"+".csv", 'wb')
+		self.file = open("output/Crawling_"+str(datetime.datetime.now())+".csv", 'wb')
 		self.exporter = CsvItemExporter(self.file, unicode)
 		self.exporter.start_exporting()
 	def close_spider(self, spider):

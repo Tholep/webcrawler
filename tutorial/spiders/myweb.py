@@ -16,6 +16,7 @@ from scrapy.utils.project import get_project_settings
 
 import re
 
+Max_depth=2
 class myspider(scrapy.Spider):
     name = "myweb"
     '''
@@ -55,12 +56,13 @@ class myspider(scrapy.Spider):
     def parse_web(self, response):
         #get content
         #only record titles with key words of interests
+        '''
         print "*************************************"
         print "*************************************"
         print response.meta
         print "*************************************"
         print "*************************************"
-
+        '''
         title=response.xpath('//title/text()').re(r'(?i)student|parent|log in|sign in|SIS|SIMS|information|staff|sign up|powerschool|ISAM')
         if len(title)>0:
             l = ItemLoader(item=SchoolInfo(), response=response)
@@ -82,17 +84,16 @@ class myspider(scrapy.Spider):
         #item['id'] = response.xpath('//td[@id="item_id"]/text()').re(r'ID: (\d+)')
 
         #get next pages : list of link from href ( deny : ico, js,css, pdf,) , allow = html, 
-        print "**********************************************************"
+        #print "**********************************************************"
         #print "%s with depth of %s from %s - %s" % (response.url,response.meta['depth'],response.meta['download_slot'],response.meta['item'])
-        print "**********************************************************"
+        #print "**********************************************************"
         
-        if response.meta['depth'] < 2:              
+        if response.meta['depth'] < Max_depth:              
             links = response.css('a::attr(href)').extract() # list of links
             if links is not None:
                 for link in links:
                     next_page = response.urljoin(link)
-                    regex=r'(facebook|twitter|linked).*)'
-                    if not re.search(regex,next_page):
-                    
+                    regex=r'(facebook|twitter|linked|youtube).*'
+                    if re.search(regex,next_page) is None:
                         yield scrapy.Request(next_page, callback=self.parse_web,meta={'item':response.meta['item']})
         
