@@ -14,7 +14,7 @@ import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
-
+import re
 
 class myspider(scrapy.Spider):
     name = "myweb"
@@ -60,7 +60,8 @@ class myspider(scrapy.Spider):
         print response.meta
         print "*************************************"
         print "*************************************"
-        title=response.xpath('//title/text()').re(r'(?i)student|parent|log in|sign in|SIS|SIMS|information|administrator|admin|staff|sign up|powerschool')
+
+        title=response.xpath('//title/text()').re(r'(?i)student|parent|log in|sign in|SIS|SIMS|information|staff|sign up|powerschool|ISAM')
         if len(title)>0:
             l = ItemLoader(item=SchoolInfo(), response=response)
             l.add_css('title',"title::text")
@@ -90,5 +91,8 @@ class myspider(scrapy.Spider):
             if links is not None:
                 for link in links:
                     next_page = response.urljoin(link)
-                    yield scrapy.Request(next_page, callback=self.parse_web,meta={'item':response.meta['item']})
+                    regex=r'(facebook|twitter|linked).*)'
+                    if not re.search(regex,next_page):
+                    
+                        yield scrapy.Request(next_page, callback=self.parse_web,meta={'item':response.meta['item']})
         
