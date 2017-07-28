@@ -19,8 +19,8 @@ import pandas as pd
 
 Max_depth=3
 filters_scheme=r'^(javascript|mailto|tel)'
-filters_pages=r'.*?(facebook|twitter|linkedin|youtube).*?'
-filters_extension=r'(\.pdf|\.jpg|\.mp4)$'
+filters_pages=r'.*?(facebook|twitter|linkedin|youtube|yahoo|Flickr|apple|google).*?'
+filters_extension=r'(\.pdf|\.jpg|\.mp4|\.png|\.jpeg|\.icon|\.doc|\.docx|\.xls|\.xlsx|\.js)$'
 
 regex_scheme=re.compile(filters_scheme,re.IGNORECASE)
 regex_pages=re.compile(filters_pages,re.IGNORECASE)
@@ -78,7 +78,7 @@ class myspider(scrapy.Spider):
             yield l.load_item()
         
       
-        if response.meta['depth'] < 3:              
+        if response.meta['depth'] < Max_depth:              
             links = response.css('a::attr(href)').extract() # list of links
             if links is not None:
                 for link in links:
