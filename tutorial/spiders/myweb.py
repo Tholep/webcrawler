@@ -15,8 +15,17 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 
 import re
+import pandas as pd
 
-Max_depth=2
+Max_depth=3
+filters_scheme=r'^(javascript|mailto|tel)'
+filters_pages=r'.*?(facebook|twitter|linkedin|youtube).*?'
+filters_extension=r'(\.pdf|\.jpg|\.mp4)$'
+
+regex_scheme=re.compile(filters_scheme,re.IGNORECASE)
+regex_pages=re.compile(filters_pages,re.IGNORECASE)
+regex_extension=re.compile(filters_extension,re.IGNORECASE)
+
 class myspider(scrapy.Spider):
     name = "myweb"
     '''
@@ -38,13 +47,16 @@ class myspider(scrapy.Spider):
         with open("urls.txt", "rt") as f:
             urls = [url.strip() for url in f.readlines()]
         '''
+        t=pd.read_excel("input/SIS_project.xlsx")
+        urls=t["Link"].dropna().values
+        '''
         urls = [
             'http://www.aisr.nl/',
             'https://riss.wolfert.nl/',
             'https://www.britishschool.nl/'
   
         ]
-        
+        '''
         for url in urls:
             request=scrapy.Request(url=url, callback=self.parse_web)
 
@@ -54,15 +66,7 @@ class myspider(scrapy.Spider):
             #yield scrapy.Request(url=url, meta={'item_info':url},callback=self.parse)
 
     def parse_web(self, response):
-        #get content
-        #only record titles with key words of interests
-        '''
-        print "*************************************"
-        print "*************************************"
-        print response.meta
-        print "*************************************"
-        print "*************************************"
-        '''
+    
         title=response.xpath('//title/text()').re(r'(?i)student|parent|log in|sign in|SIS|SIMS|information|staff|sign up|powerschool|ISAM')
         if len(title)>0:
             l = ItemLoader(item=SchoolInfo(), response=response)
@@ -73,27 +77,12 @@ class myspider(scrapy.Spider):
             print "load item:", l.load_item()
             yield l.load_item()
         
-        '''
-        yield { "title":response.css("title::text").extract(),
-                       
-                "depth":response.meta['depth'],
-                #"previous":response.meta['download_slot'],
-                "link":response.url,
-        }
-        '''
-        #item['id'] = response.xpath('//td[@id="item_id"]/text()').re(r'ID: (\d+)')
-
-        #get next pages : list of link from href ( deny : ico, js,css, pdf,) , allow = html, 
-        #print "**********************************************************"
-        #print "%s with depth of %s from %s - %s" % (response.url,response.meta['depth'],response.meta['download_slot'],response.meta['item'])
-        #print "**********************************************************"
-        
-        if response.meta['depth'] < Max_depth:              
+      
+        if response.meta['depth'] < 3:              
             links = response.css('a::attr(href)').extract() # list of links
             if links is not None:
                 for link in links:
                     next_page = response.urljoin(link)
-                    regex=r'(facebook|twitter|linked|youtube).*'
-                    if re.search(regex,next_page) is None:
+                    if (regex_scheme.search(next_page) is None and regex_extension.search(next_page) is None and regex_pages.search(next_page) is None):
                         yield scrapy.Request(next_page, callback=self.parse_web,meta={'item':response.meta['item']})
         

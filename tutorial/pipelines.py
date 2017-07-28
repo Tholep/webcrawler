@@ -8,7 +8,7 @@ from scrapy.exporters  import CsvItemExporter
 import datetime
 class SchoolInfoPipeline(object):
 	def __init__(self):
-		self.file = open("output/Crawling_"+str(datetime.datetime.now())+".csv", 'wb')
+		self.file = open("output/Crawling_NL"+str(datetime.datetime.now())+".csv", 'wb')
 		self.exporter = CsvItemExporter(self.file, unicode)
 		self.exporter.start_exporting()
 	def close_spider(self, spider):
