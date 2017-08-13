@@ -19,40 +19,37 @@ import pandas as pd
 
 Max_depth=2
 filters_scheme=r'^(javascript|mailto|tel)'
-filters_pages=r'.*?(facebook|twitter|linkedin|youtube|yahoo|Flickr|apple|google|vimeo|instagram).*?'
-filters_extension=r'(\.pdf|\.jpg|\.mp4|\.png|\.jpeg|\.icon|\.doc|\.docx|\.xls|\.xlsx|\.js|\.bz2|rss|RSS)$'
+filters_pages=r'.*?(facebook|twitter|linkedin|youtube|yahoo|Flickr|apple|google|vimeo).*?'
+filters_extension=r'(\.pdf|\.jpg|\.mp4|\.png|\.jpeg|\.icon|\.doc|\.docx|\.xls|\.xlsx|\.js|\.bz2)$'
 
 regex_schemes=re.compile(filters_scheme,re.IGNORECASE)
 regex_pages=re.compile(filters_pages,re.IGNORECASE)
 regex_extensions=re.compile(filters_extension,re.IGNORECASE)
 
 class myspider(scrapy.Spider):
-    name = "myweb"
+    name = "specific"
 
     def start_requests(self):
         #input school links
-        t=pd.read_excel("input/UK_SIS.xlsx")
+        t=pd.read_excel("input/UK_schools.xlsx")
         urls=t["Link"].dropna().values
-        #urls=["http://www.stjohnsdevon.co.uk/"]
         # send request to each link
         for url in urls:
             request=scrapy.Request(url=url, callback=self.parse_web)
+
             request.meta['school'] = url
             request.meta['previous']=url
             yield request
     def parse_web(self, response):
-        filter_title=r'(?i)user|username|password|platform|connect|portal|admission|student|parent|parental|log in|login|sign in|signin|apply|enrol|SIS|SIMS|MIS|information|staff|sign up|powerschool|ISAM|Engage'
-        filter_body=r'(?i)\buser\b|\busername\b|\bpassword\b|\bplatform\b|\bportal\b|\blog in\b|\blogin\b|\bsign in\b|\bsignin\b|\bSIS\b|\bSIMS\b|\bMIS\b|\bsign up\b|\bpowerschool\b|\bISAM\b|\bEngage\b'
-        title=response.xpath('//title/text()').re(filter_title)
-        body=response.xpath('//body//text()').re(filter_body)
-        if len(title)>0 or len(body)>0:
+    
+        title=response.xpath('//title/text()').re(r'(?i)portal|admission|student|parent|log in|login|sign in|signin|apply|enrol|SIS|SIMS|information|staff|sign up|powerschool|ISAM')
+        if len(title)>0:
             l = ItemLoader(item=SchoolInfo(), response=response)
             l.add_css('title',"title::text")
             l.add_value('depth',response.meta['depth'])
             l.add_value('link',response.url)
             l.add_value('school',response.meta['school'])
             l.add_value('previous',response.meta['previous'])
-            l.add_value('keywords',"_".join(set(body)))
             print "load item:", l.load_item()
             yield l.load_item()
         

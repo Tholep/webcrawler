@@ -12,7 +12,9 @@ class SchoolInfo(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     title=scrapy.Field()
+    keywords=scrapy.Field()
     depth=scrapy.Field()
     link=scrapy.Field()
     school=scrapy.Field()
+    previous=scrapy.Field()
 
