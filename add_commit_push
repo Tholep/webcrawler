@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Git add * ---> add all"
+git add *
+
+echo "Git commit -m 'Date $(date)'"
+git commit -m "Date $(date)"
+
+
+echo "git pull"
+git pull
+
+echo "git push origin master"
+git push origin master
