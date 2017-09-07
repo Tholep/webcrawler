@@ -17,4 +17,3 @@ class SchoolInfo(scrapy.Item):
     link=scrapy.Field()
     school=scrapy.Field()
     previous=scrapy.Field()
-

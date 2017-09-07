@@ -9,13 +9,13 @@ import datetime
 class SchoolInfoPipeline(object):
 	def __init__(self):
 		#self.file = open("output/UK_D2"+str(datetime.datetime.now())+".csv", 'wb')
-		self.file = open("output/marymountlondon"+".csv", 'wb')
+		self.file = open("output/sg"+".csv", 'wb')
 		self.exporter = CsvItemExporter(self.file, unicode)
 		self.exporter.start_exporting()
 	def close_spider(self, spider):
 		self.exporter.finish_exporting()
 		self.file.close()
- 
+
 	def process_item(self, item, spider):
 		self.exporter.export_item(item)
 		return item
